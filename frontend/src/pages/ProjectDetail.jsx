@@ -20,9 +20,9 @@ export default function ProjectDetail() {
       <button onClick={() => navigate('/projects')} className="text-sm text-blue-600 hover:underline">← Back to Projects</button>
 
       <div className="p-6 rounded-xl border" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <h1 className="text-2xl font-bold">{project.name}</h1>
+        <div className="flex items-start justify-between gap-2 mb-4 flex-wrap">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold">{project.name}</h1>
             <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>{project.description}</p>
           </div>
           <Badge value={project.status} />

@@ -96,7 +96,7 @@ export default function Projects() {
       {/* Filters */}
       <div className="flex flex-wrap gap-2">
         <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} placeholder="🔍 Search projects..."
-          className="px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 min-w-0 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--text)' }} />
         <select value={status} onChange={e => { setStatus(e.target.value); setPage(1); }}
           className="px-3 py-2 rounded-lg border text-sm focus:outline-none"

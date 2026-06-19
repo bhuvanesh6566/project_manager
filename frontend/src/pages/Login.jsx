@@ -25,8 +25,8 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg)' }}>
-      <div className="w-full max-w-md p-8 rounded-2xl shadow-xl border" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: 'var(--bg)' }}>
+      <div className="w-full max-w-md p-6 sm:p-8 rounded-2xl shadow-xl border" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
         <div className="text-center mb-8">
           <div className="text-4xl mb-2">⚡</div>
           <h1 className="text-2xl font-bold text-blue-600">DevFlow</h1>

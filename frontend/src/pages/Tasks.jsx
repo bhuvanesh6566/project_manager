@@ -130,7 +130,7 @@ export default function Tasks() {
       {/* Filters */}
       <div className="flex flex-wrap gap-2">
         <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} placeholder="🔍 Search tasks..."
-          className="px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 min-w-0 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--text)' }} />
         {[['Status', status, setStatus, ['', ...STATUSES]], ['Priority', priority, setPriority, ['', ...PRIORITIES]]].map(([label, val, set, opts]) => (
           <select key={label} value={val} onChange={e => { set(e.target.value); setPage(1); }}
@@ -147,10 +147,46 @@ export default function Tasks() {
         </select>
       </div>
 
-      {/* Table */}
+      {/* Table / Cards */}
       {isLoading ? <div className="text-center py-12" style={{ color: 'var(--muted)' }}>Loading...</div> : (
         <>
-          <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--border)' }}>
+          {/* Mobile cards */}
+          <div className="flex flex-col gap-3 md:hidden">
+            {data?.tasks.map(task => (
+              <div key={task.id} className="p-4 rounded-xl border" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <p className="font-medium text-sm">{task.name}</p>
+                  <Badge value={task.priority} />
+                </div>
+                <p className="text-xs mb-2" style={{ color: 'var(--muted)' }}>{task.Project?.name}</p>
+                <div className="flex flex-wrap gap-1 mb-3">
+                  <Badge value={task.status} />
+                  <Badge value={task.type} />
+                </div>
+                {task.dueDate && (
+                  <p className={`text-xs mb-3 ${isOverdue(task) ? 'text-red-500 font-medium' : ''}`} style={!isOverdue(task) ? { color: 'var(--muted)' } : {}}>
+                    {isOverdue(task) ? '🚨 ' : '📅 '}{task.dueDate}
+                  </p>
+                )}
+                {task.estimatedHours && <p className="text-xs mb-3" style={{ color: 'var(--muted)' }}>⏱ {task.estimatedHours}h estimated</p>}
+                <div className="flex gap-2">
+                  <button onClick={() => setModal({ ...task, projectId: task.projectId?.toString() })}
+                    className="flex-1 py-1.5 text-xs border rounded-lg hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors"
+                    style={{ borderColor: 'var(--border)' }}>Edit</button>
+                  <button onClick={() => setDeleting(task.id)}
+                    className="flex-1 py-1.5 text-xs border border-red-200 text-red-500 rounded-lg hover:bg-red-50 transition-colors">Delete</button>
+                </div>
+              </div>
+            ))}
+            {data?.tasks.length === 0 && (
+              <div className="text-center py-16" style={{ color: 'var(--muted)' }}>
+                <div className="text-5xl mb-3">📝</div><p>No tasks found.</p>
+              </div>
+            )}
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden md:block rounded-xl border overflow-hidden" style={{ borderColor: 'var(--border)' }}>
             <table className="w-full text-sm">
               <thead>
                 <tr style={{ backgroundColor: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
@@ -160,7 +196,7 @@ export default function Tasks() {
                 </tr>
               </thead>
               <tbody>
-                {data?.tasks.map((task, i) => (
+                {data?.tasks.map((task) => (
                   <tr key={task.id}
                     className="border-t transition-colors hover:opacity-90"
                     style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>

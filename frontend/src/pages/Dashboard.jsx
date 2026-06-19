@@ -24,7 +24,7 @@ export default function Dashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-7 gap-3">
         <StatCard icon="📂" label="Total Projects" value={stats.totalProjects} color="blue" />
         <StatCard icon="📝" label="Total Tasks" value={stats.totalTasks} color="purple" />
         <StatCard icon="✅" label="Completed" value={stats.completedTasks} color="green" />
