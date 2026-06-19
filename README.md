@@ -2,7 +2,7 @@
 
 A full-stack web application for managing software projects and tasks with dashboards, analytics, and email reminders.
 
-🌐 **Live Demo:** https://project-manager-jkka.vercel.app  
+🌐 **Live Demo:** https://project-manager-bay-iota.vercel.app  
 🔗 **GitHub:** https://github.com/bhuvanesh6566/project_manager
 
 ---
