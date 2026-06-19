@@ -1,18 +1,34 @@
 # ⚡ DevFlow – Project Management System
 
-A full-stack web application for managing software projects and tasks, built with React, Node.js, Express, and MySQL.
+A full-stack web application for managing software projects and tasks with dashboards, analytics, and email reminders.
+
+🌐 **Live Demo:** https://project-manager-jkka.vercel.app  
+🔗 **GitHub:** https://github.com/bhuvanesh6566/project_manager
+
+---
+
+## Table of Contents
+
+1. [Tech Stack](#tech-stack)
+2. [Project Structure](#project-structure)
+3. [Project Setup Instructions](#project-setup-instructions)
+4. [Environment Variable Documentation](#environment-variable-documentation)
+5. [Database Setup Instructions](#database-setup-instructions)
+6. [API Documentation](#api-documentation)
+7. [Security Features](#security-features)
+8. [Bonus Features](#bonus-features)
 
 ---
 
 ## Tech Stack
 
-| Layer    | Technology                                      |
-|----------|-------------------------------------------------|
+| Layer    | Technology |
+|----------|-----------|
 | Frontend | React 19, Vite, Tailwind CSS, React Router, Recharts, React Hook Form + Zod, TanStack Query |
-| Backend  | Node.js, Express, Sequelize ORM                 |
-| Database | MySQL 8                                         |
-| Auth     | JWT + bcrypt                                    |
-| Extras   | Winston logger, node-cron, nodemailer, rate limiting |
+| Backend  | Node.js, Express.js, Sequelize ORM |
+| Database | MySQL 8 |
+| Auth     | JWT + bcrypt |
+| Extras   | Winston logger, node-cron, nodemailer, express-rate-limit, express-validator |
 
 ---
 
@@ -21,107 +37,98 @@ A full-stack web application for managing software projects and tasks, built wit
 ```
 project_manager/
 ├── backend/
-│   ├── config/          # Database config
-│   ├── controllers/     # Route handlers
-│   ├── middleware/       # Auth middleware
-│   ├── models/          # Sequelize models
-│   ├── routes/          # API routes
-│   ├── services/        # Activity log, cron jobs
-│   ├── utils/           # Logger, email
-│   ├── validators/      # Input validation rules
-│   ├── logs/            # Winston log files
-│   └── server.js        # Entry point
-└── frontend/
-    └── src/
-        ├── components/  # Badge, Modal, StatCard, ProgressBar
-        ├── context/     # AuthContext, ThemeContext
-        ├── layouts/     # MainLayout (sidebar)
-        ├── pages/       # Dashboard, Projects, Tasks, Activity, Profile
-        ├── services/    # Axios instance
-        └── App.jsx      # Routes
+│   ├── config/
+│   │   └── database.js          # Sequelize + MySQL connection
+│   ├── controllers/
+│   │   ├── authController.js    # Register, login, logout, profile
+│   │   ├── projectController.js # Project CRUD
+│   │   ├── taskController.js    # Task CRUD
+│   │   └── dashboardController.js # Stats + charts
+│   ├── middleware/
+│   │   └── auth.js              # JWT verification + blacklist check
+│   ├── models/
+│   │   ├── User.js
+│   │   ├── Project.js
+│   │   ├── Task.js
+│   │   ├── ActivityLog.js
+│   │   └── index.js             # Associations
+│   ├── routes/
+│   │   ├── auth.js
+│   │   ├── projects.js
+│   │   ├── tasks.js
+│   │   └── dashboard.js
+│   ├── services/
+│   │   ├── activityService.js   # Activity log helper
+│   │   └── cronService.js       # Daily email reminder cron
+│   ├── utils/
+│   │   ├── logger.js            # Winston logger
+│   │   └── email.js             # Nodemailer
+│   ├── validators/
+│   │   └── validators.js        # express-validator rules
+│   ├── logs/                    # Winston log files
+│   ├── .env                     # Environment variables
+│   └── server.js                # Entry point
+├── frontend/
+│   └── src/
+│       ├── components/          # Badge, Modal, StatCard, ProgressBar
+│       ├── context/             # AuthContext, ThemeContext
+│       ├── layouts/             # MainLayout (sidebar + mobile nav)
+│       ├── pages/               # Dashboard, Projects, Tasks, Activity, Profile
+│       ├── services/
+│       │   └── api.js           # Axios instance
+│       └── App.jsx              # Routes
+├── database/
+│   └── schema.sql               # Full MySQL schema with indexes + FK
+└── README.md
 ```
 
 ---
 
-## Prerequisites
+## Project Setup Instructions
+
+### Prerequisites
 
 - Node.js >= 18
-- MySQL 8
+- MySQL 8 (local) or Aiven free cloud MySQL
+- Git
 
 ---
 
-## Environment Variables (`backend/.env`)
-
-| Variable        | Description                        | Example                    |
-|-----------------|------------------------------------|----------------------------|
-| `PORT`          | Backend server port                | `5000`                     |
-| `DB_HOST`       | MySQL host                         | `localhost`                |
-| `DB_PORT`       | MySQL port                         | `3306`                     |
-| `DB_USER`       | MySQL username                     | `root`                     |
-| `DB_PASSWORD`   | MySQL password                     | `yourpassword`             |
-| `DB_NAME`       | MySQL database name                | `devflow`                  |
-| `JWT_SECRET`    | Secret key for JWT signing         | `your_secret_key`          |
-| `JWT_EXPIRES_IN`| JWT token expiry                   | `7d`                       |
-| `EMAIL_HOST`    | SMTP host for email reminders      | `smtp.gmail.com`           |
-| `EMAIL_PORT`    | SMTP port                          | `587`                      |
-| `EMAIL_USER`    | SMTP email address                 | `you@gmail.com`            |
-| `EMAIL_PASS`    | SMTP app password                  | `your_app_password`        |
-| `CLIENT_URL`    | Frontend URL for CORS              | `http://localhost:5173`    |
-
----
-
-## Database Setup
+### 1. Clone the Repository
 
 ```bash
-# Login to MySQL and create database
-mysql -u root -p
-CREATE DATABASE devflow CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-exit;
+git clone https://github.com/bhuvanesh6566/project_manager.git
+cd project_manager
 ```
-
-Tables are auto-created on first server start via `sequelize.sync({ alter: true })`.
-
-### Database Schema (ER Overview)
-
-```
-Users
-  id, name, email (unique), password (hashed), createdAt, updatedAt
-
-Projects
-  id, name, description, status (enum), startDate, endDate,
-  userId (FK → Users.id), createdAt, updatedAt
-
-Tasks
-  id, name, description, priority (enum), status (enum), type (enum),
-  estimatedHours, dueDate, projectId (FK → Projects.id),
-  userId (FK → Users.id), createdAt, updatedAt
-
-ActivityLogs
-  id, action, entity, entityId, userId (FK → Users.id), createdAt, updatedAt
-```
-
-**Relationships:**
-- User → (1:Many) → Projects
-- Project → (1:Many) → Tasks
-- User → (1:Many) → Tasks
-- User → (1:Many) → ActivityLogs
 
 ---
 
-## Setup & Run
-
-### Backend
+### 2. Backend Setup
 
 ```bash
 cd backend
 npm install
-# Edit .env with your credentials
-npm run dev
 ```
 
-Server starts on `http://localhost:5000`
+Create your `.env` file (see [Environment Variables](#environment-variable-documentation)):
 
-### Frontend
+```bash
+cp .env.example .env
+# Edit .env with your values
+```
+
+Start the backend:
+
+```bash
+npm run dev       # Development (nodemon)
+npm start         # Production
+```
+
+Server runs at: `http://localhost:5000`
+
+---
+
+### 3. Frontend Setup
 
 ```bash
 cd frontend
@@ -129,35 +136,137 @@ npm install
 npm run dev
 ```
 
-App opens at `http://localhost:5173`
+App runs at: `http://localhost:5173`
+
+> For production build: `npm run build`
+
+---
+
+## Environment Variable Documentation
+
+Create `backend/.env` with the following variables:
+
+| Variable | Required | Description | Example |
+|----------|----------|-------------|---------|
+| `PORT` | No | Backend server port | `5000` |
+| `DB_HOST` | ✅ | MySQL hostname | `localhost` |
+| `DB_PORT` | ✅ | MySQL port | `3306` |
+| `DB_USER` | ✅ | MySQL username | `root` |
+| `DB_PASSWORD` | ✅ | MySQL password | `yourpassword` |
+| `DB_NAME` | ✅ | MySQL database name | `devflow` |
+| `JWT_SECRET` | ✅ | Secret key for signing JWT tokens | `any_random_string` |
+| `JWT_EXPIRES_IN` | No | JWT token expiry duration | `7d` |
+| `EMAIL_HOST` | No | SMTP host for email reminders | `smtp.gmail.com` |
+| `EMAIL_PORT` | No | SMTP port | `587` |
+| `EMAIL_USER` | No | SMTP sender email address | `you@gmail.com` |
+| `EMAIL_PASS` | No | Gmail App Password (not login password) | `xxxx xxxx xxxx xxxx` |
+| `CLIENT_URL` | ✅ | Frontend URL for CORS | `http://localhost:5173` |
+
+> **Gmail App Password:** Go to Google Account → Security → 2-Step Verification → App Passwords → generate one for "Mail".
+
+---
+
+### Frontend Environment Variables
+
+Create `frontend/.env` for production:
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `VITE_API_URL` | Backend API base URL | `https://your-backend.onrender.com/api` |
+
+> In local development, the Vite proxy handles `/api` automatically — no `.env` needed.
+
+---
+
+## Database Setup Instructions
+
+### Option A — Local MySQL
+
+```sql
+-- Run in MySQL client
+CREATE DATABASE devflow CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+Then start the backend — Sequelize auto-creates all tables via:
+```js
+sequelize.sync({ alter: true })
+```
+
+### Option B — Run Schema Manually
+
+```bash
+mysql -u root -p devflow < database/schema.sql
+```
+
+### Option C — Cloud MySQL (Aiven)
+
+1. Sign up at [aiven.io](https://aiven.io) → create free MySQL service
+2. Copy `Host`, `Port`, `User`, `Password` from the Aiven dashboard
+3. Add them to your `.env`
+4. SSL is required — already configured in `config/database.js`
+
+---
+
+### Database Schema (ER Overview)
+
+```
+Users
+  id, name, email (unique), password (bcrypt), createdAt, updatedAt
+
+Projects
+  id, name, description, status (enum), startDate, endDate,
+  userId (FK → Users.id), createdAt, updatedAt
+
+Tasks
+  id, name, description, priority (enum), status (enum), type (enum),
+  estimatedHours, dueDate,
+  projectId (FK → Projects.id), userId (FK → Users.id),
+  createdAt, updatedAt
+
+ActivityLogs
+  id, action, entity, entityId,
+  userId (FK → Users.id), createdAt, updatedAt
+```
+
+**Relationships:**
+- User `1 → Many` Projects
+- User `1 → Many` Tasks
+- User `1 → Many` ActivityLogs
+- Project `1 → Many` Tasks
+
+**Cascade:** Deleting a User removes all their Projects, Tasks, and Logs. Deleting a Project removes all its Tasks.
 
 ---
 
 ## API Documentation
 
-All protected routes require: `Authorization: Bearer <token>`
+All protected routes require the header:
+```
+Authorization: Bearer <token>
+```
+
+---
 
 ### Authentication
 
-| Method | Endpoint              | Auth | Description              |
-|--------|-----------------------|------|--------------------------|
-| POST   | `/api/auth/register`  | No   | Register new user        |
-| POST   | `/api/auth/login`     | No   | Login (rate limited)     |
-| POST   | `/api/auth/logout`    | Yes  | Logout (invalidate token)|
-| GET    | `/api/auth/profile`   | Yes  | Get current user profile |
-| PUT    | `/api/auth/profile`   | Yes  | Update name or password  |
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `POST` | `/api/auth/register` | ❌ | Register a new user |
+| `POST` | `/api/auth/login` | ❌ | Login (rate limited: 10/15min) |
+| `POST` | `/api/auth/logout` | ✅ | Logout and invalidate token |
+| `GET` | `/api/auth/profile` | ✅ | Get current user info |
+| `PUT` | `/api/auth/profile` | ✅ | Update name or password |
 
-**Register Body:**
+**POST /api/auth/register**
 ```json
 { "name": "John Doe", "email": "john@example.com", "password": "secret123" }
 ```
 
-**Login Body:**
+**POST /api/auth/login**
 ```json
 { "email": "john@example.com", "password": "secret123" }
 ```
-
-**Login Response:**
+Response:
 ```json
 { "token": "<jwt>", "user": { "id": 1, "name": "John Doe", "email": "john@example.com" } }
 ```
@@ -166,26 +275,29 @@ All protected routes require: `Authorization: Bearer <token>`
 
 ### Projects
 
-| Method | Endpoint              | Description                        |
-|--------|-----------------------|------------------------------------|
-| GET    | `/api/projects`       | Get all projects (search/filter/sort/paginate) |
-| GET    | `/api/projects/:id`   | Get project with tasks             |
-| POST   | `/api/projects`       | Create project                     |
-| PUT    | `/api/projects/:id`   | Update project                     |
-| DELETE | `/api/projects/:id`   | Delete project (cascades tasks)    |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/projects` | Get all projects (search/filter/sort/paginate) |
+| `GET` | `/api/projects/:id` | Get single project with tasks |
+| `POST` | `/api/projects` | Create a project |
+| `PUT` | `/api/projects/:id` | Update a project |
+| `DELETE` | `/api/projects/:id` | Delete project (cascades tasks) |
 
-**Query Params (GET /api/projects):**
-- `search` — filter by name
-- `status` — `Not Started` | `In Progress` | `Completed`
-- `sort` — `newest` | `oldest`
-- `page` — page number (default: 1)
-- `limit` — items per page (default: 10)
+**Query Parameters (GET /api/projects):**
 
-**Create/Update Body:**
+| Param | Description | Values |
+|-------|-------------|--------|
+| `search` | Filter by project name | any string |
+| `status` | Filter by status | `Not Started`, `In Progress`, `Completed` |
+| `sort` | Sort order | `newest` (default), `oldest` |
+| `page` | Page number | default: `1` |
+| `limit` | Items per page | default: `10` |
+
+**Request Body (POST/PUT):**
 ```json
 {
   "name": "E-Commerce Website",
-  "description": "Full stack shop",
+  "description": "Full stack shopping app",
   "status": "In Progress",
   "startDate": "2024-01-01",
   "endDate": "2024-06-30"
@@ -196,23 +308,32 @@ All protected routes require: `Authorization: Bearer <token>`
 
 ### Tasks
 
-| Method | Endpoint                 | Description                   |
-|--------|--------------------------|-------------------------------|
-| GET    | `/api/tasks`             | Get all tasks (with filters)  |
-| GET    | `/api/tasks/:id`         | Get single task               |
-| POST   | `/api/tasks`             | Create task                   |
-| PUT    | `/api/tasks/:id`         | Update task                   |
-| DELETE | `/api/tasks/:id`         | Delete task                   |
-| PATCH  | `/api/tasks/:id/complete`| Mark task as completed        |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/tasks` | Get all tasks (with filters) |
+| `GET` | `/api/tasks/:id` | Get single task |
+| `POST` | `/api/tasks` | Create a task |
+| `PUT` | `/api/tasks/:id` | Update a task |
+| `DELETE` | `/api/tasks/:id` | Delete a task |
+| `PATCH` | `/api/tasks/:id/complete` | Mark task as completed |
 
-**Query Params (GET /api/tasks):**
-- `search`, `status`, `priority`, `type`, `sort`, `page`, `limit`, `projectId`
+**Query Parameters (GET /api/tasks):**
 
-**Create/Update Body:**
+| Param | Description |
+|-------|-------------|
+| `search` | Filter by task name |
+| `status` | `Pending`, `In Progress`, `Completed` |
+| `priority` | `Low`, `Medium`, `High` |
+| `type` | `Feature`, `Bug`, `Enhancement` |
+| `projectId` | Filter by project |
+| `sort` | `newest` or `oldest` |
+| `page` / `limit` | Pagination |
+
+**Request Body (POST/PUT):**
 ```json
 {
   "name": "Build login page",
-  "description": "JWT-based authentication",
+  "description": "JWT-based auth",
   "projectId": 1,
   "priority": "High",
   "status": "Pending",
@@ -226,25 +347,42 @@ All protected routes require: `Authorization: Bearer <token>`
 
 ### Dashboard
 
-| Method | Endpoint          | Description                        |
-|--------|-------------------|------------------------------------|
-| GET    | `/api/dashboard`  | Get stats, charts, recent activity |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/dashboard` | Get stats, charts, recent activity |
 
-**Response includes:**
-- `stats` — totalProjects, totalTasks, completedTasks, pendingTasks, inProgressProjects, overdueTasks, completionPercentage
-- `charts` — taskStatus (pie), taskPriority (bar), weeklyCompleted (line)
-- `recentProjects` — 5 most recently updated
-- `activityLogs` — 10 most recent actions
+**Response:**
+```json
+{
+  "stats": {
+    "totalProjects": 5,
+    "totalTasks": 20,
+    "completedTasks": 8,
+    "pendingTasks": 7,
+    "inProgressProjects": 3,
+    "overdueTasks": 2,
+    "completionPercentage": 40
+  },
+  "charts": {
+    "taskStatus": [...],
+    "taskPriority": [...],
+    "weeklyCompleted": [...]
+  },
+  "recentProjects": [...],
+  "activityLogs": [...]
+}
+```
 
 ---
 
-### Error Response Format
+### Error Responses
 
+**General error:**
 ```json
 { "message": "Error description" }
 ```
 
-Validation errors:
+**Validation error (422):**
 ```json
 {
   "errors": [
@@ -254,28 +392,37 @@ Validation errors:
 }
 ```
 
+**Unauthorized (401):**
+```json
+{ "message": "No token provided" }
+```
+
 ---
 
 ## Security Features
 
-- Passwords hashed with **bcrypt** (10 salt rounds)
-- **JWT** authentication on all protected routes
-- Token **blacklist** on logout
-- **Rate limiting**: 10 login attempts / 15 min, 20 registrations / hour
-- **Input validation** on all POST/PUT endpoints via `express-validator`
-- **Authorization**: users can only access their own data (userId scoping on all queries)
-- **SQL Injection protection** via Sequelize ORM parameterized queries
-- Sensitive fields (password) never returned in API responses
+| Feature | Implementation |
+|---------|---------------|
+| Password hashing | bcrypt with 10 salt rounds |
+| Authentication | JWT tokens with expiry |
+| Token invalidation | In-memory blacklist on logout |
+| Rate limiting | 10 login attempts / 15 min per IP |
+| Input validation | express-validator on all POST/PUT |
+| Authorization | userId scoping — users only access own data |
+| SQL Injection | Sequelize ORM parameterized queries |
+| Sensitive data | Password field never returned in responses |
+| CORS | Restricted to `CLIENT_URL` only |
 
 ---
 
 ## Bonus Features
 
-- 📊 Dashboard with Pie, Bar, and Line charts
+- 📊 Dashboard with Pie, Bar, and Line charts (Recharts)
 - 📋 Activity logs for all create/update/delete actions
-- 📧 Email reminders for tasks due tomorrow (daily cron at 8 AM)
+- 📧 3-tier email reminders (3 days before, 1 day before, overdue) via daily cron at 8 AM
 - 🌙 Dark mode toggle
 - 📄 Pagination on all list endpoints
 - 🔄 Project progress percentage based on completed tasks
-- ⚠️ Overdue task highlighting
-- 👤 Profile page with name and password update
+- ⚠️ Overdue task highlighting in red
+- 👤 Profile page — update name and change password
+- 📱 Responsive design — mobile bottom nav + desktop sidebar
